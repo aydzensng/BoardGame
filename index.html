@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#ff9c4a">
   <meta name="msapplication-TileColor" content="#ff9c4a">
 
-  <title>Little Pillow's Board Game Preview</title>
+  <title>Little Pillow's Board Game</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -840,15 +840,14 @@
   <section id="loginScreen" class="screen">
     <div class="login-card">
       <h1>Little Pillow's Board Game</h1>
-      <p>Masukkan nama dan password untuk masuk ke game live. Semua pemain akan masuk ke room yang sama.</p>
+      <p>Roll the dice, complete the mission, and reach the final step together</p>
 
       <div class="login-badges">
         <div class="label-chip">Live Board Game</div>
-        <div class="label-chip">1 Shared Room</div>
       </div>
 
-      <input id="nameInput" placeholder="Nama / Username kamu" />
-      <input id="passwordInput" type="password" placeholder="Password game" />
+      <input id="nameInput" placeholder="Your Name" />
+      <input id="passwordInput" type="password" placeholder="Pass" />
 
       <div class="photo-upload">
         <label>Upload foto player kamu</label>
@@ -862,7 +861,7 @@
       <button id="joinBtn">Masuk Game</button>
 
       <div class="small-note">
-        Password default bisa diganti di bagian <b>GAME_PASSWORD</b>.
+        Mini Game by <b>@pillowslittle</b>.
       </div>
     </div>
   </section>
@@ -888,7 +887,7 @@
 
         <div class="dice-area">
           <div id="dice" class="dice">?</div>
-          <button id="rollBtn">Coba Dadu</button>
+          <button id="rollBtn">Dice Roll</button>
           <div class="small-note" id="diceNote">Ini cuma preview lokal buat cek tampilan.</div>
           <div class="card-tag">Game by @pillowslittle</div>
         </div>
@@ -925,7 +924,7 @@
     const SUPABASE_ANON_KEY = "sb_publishable_MPAUkapSBF9XM0rNLlaFVA_sDFNfS8o";
 
     const GAME_ROOM_ID = "little-pillows-board-live-v1";
-    const GAME_PASSWORD = "littlepillows123"; // ganti password di sini kalau mau
+    const GAME_PASSWORD = "080626"; // ganti password di sini kalau mau
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
