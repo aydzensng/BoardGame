@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light">
+  <meta name="theme-color" content="#ff9c4a">
+  <meta name="msapplication-TileColor" content="#ff9c4a">
+
+  <title>Little Pillow's Board Game Preview</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Coiny&family=Bubblegum+Sans&family=Nunito:wght@500;700;800;900&family=Schoolbell&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --orange: #f47b3f;
+      --orange-2: #ff9b57;
+      --orange-3: #ffbd70;
+      --yellow: #ffd66b;
+      --cream: #fff2d7;
+      --soft: #ffe6c5;
+      --soft-2: #fff8ea;
+      --brown: #6f351e;
+      --brown-dark: #4e2212;
+      --red: #e84c3d;
+      --white: #ffffff;
+      --shadow: 0 14px 35px rgba(128, 67, 23, 0.22);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Nunito", Arial, sans-serif;
+      color: var(--brown);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,.55), transparent 25%),
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,.35), transparent 22%),
+        linear-gradient(135deg, #ffe47d 0%, #ff9c4a 48%, #f66a35 100%);
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 130%;
+      height: 240px;
+      left: -15%;
+      border-radius: 50%;
+      background: rgba(255, 245, 206, 0.35);
+      z-index: -1;
+    }
+
+    body::before {
+      top: 40px;
+      transform: rotate(-5deg);
+    }
+
+    body::after {
+      bottom: 30px;
+      transform: rotate(6deg);
+    }
+
+    .screen {
+      width: min(1180px, 94vw);
+      margin: 0 auto;
+      padding: 26px 0;
+    }
+
+    .hidden { display: none !important; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 18px 22px;
+      border-radius: 28px;
+      background: rgba(255, 246, 226, 0.9);
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(255,255,255,.75);
+    }
+
+    .title h1 {
+      margin: 0;
+      font-family: "Coiny", cursive;
+      letter-spacing: 1px;
+      color: #b9471f;
+      text-shadow: 2px 3px 0 rgba(255,255,255,.75);
+      line-height: 1;
+      font-weight: 400;
+      font-size: clamp(34px, 5vw, 64px);
+    }
+
+    .title p {
+      margin: 8px 0 0;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .status-box {
+      text-align: right;
+      font-size: 14px;
+      line-height: 1.5;
+      min-width: 280px;
+      font-weight: 800;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff2d7;
+      border: 1px solid #ffbf7b;
+      color: #af431d;
+      margin-top: 4px;
+      font-size: 16px;
+      font-family: "Bubblegum Sans", cursive;
+      letter-spacing: .3px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .side-panel,
+    .board-wrap,
+    .mission-log {
+      border-radius: 28px;
+      background: rgba(255, 246, 226, 0.92);
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(255,255,255,.75);
+    }
+
+    .side-panel { padding: 18px; }
+
+    .side-panel h2,
+    .mission-log h2 {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      text-align: center;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ff9a4e, #ee6c32);
+      color: white;
+      font-size: 23px;
+      font-weight: 400;
+      font-family: "Bubblegum Sans", cursive;
+      letter-spacing: .3px;
+    }
+
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-card {
+      padding: 12px;
+      border-radius: 20px;
+      background: #fff6e8;
+      border: 2px solid #ffd49b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .player-token {
+      width: 38px;
+      height: 38px;
+      border-radius: 50% 50% 45% 45%;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      color: white;
+      font-weight: 900;
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.12);
+      flex: 0 0 auto;
+    }
+
+    .player-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 900;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-pos {
+      font-size: 12px;
+      opacity: .78;
+      font-weight: 800;
+    }
+
+    .turn-badge {
+      font-size: 13px;
+      color: white;
+      background: #e84c3d;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 400;
+      font-family: "Bubblegum Sans", cursive;
+    }
+
+    .dice-area {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 22px;
+      background: #fff6e8;
+      border: 2px dashed #ffba72;
+      text-align: center;
+    }
+
+    .dice {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 12px;
+      border-radius: 24px;
+      background: #fffdf7;
+      border: 3px solid #ffe0b1;
+      box-shadow: inset 0 -9px 0 rgba(255, 135, 54, .15), 0 10px 18px rgba(97, 42, 10, .18);
+      display: grid;
+      place-items: center;
+      font-size: 48px;
+      color: #d74d21;
+      font-weight: 900;
+      font-family: "Coiny", cursive;
+    }
+
+    .dice.rolling { animation: diceRoll .55s linear infinite; }
+
+    @keyframes diceRoll {
+      0% { transform: rotate(0deg) scale(1); }
+      35% { transform: rotate(13deg) scale(1.08); }
+      70% { transform: rotate(-13deg) scale(.98); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(180deg, #ff8b45, #e85e2d);
+      box-shadow: 0 8px 0 #b9401d, 0 14px 22px rgba(95, 33, 9, .22);
+      transition: transform .12s ease, filter .12s ease;
+      font-family: "Bubblegum Sans", cursive;
+      letter-spacing: .3px;
+    }
+
+    button:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 #b9401d, 0 9px 15px rgba(95, 33, 9, .18);
+    }
+
+    button:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+      transform: none;
+      filter: grayscale(.2);
+    }
+
+    .small-note {
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: .85;
+      margin-top: 10px;
+      font-weight: 800;
+    }
+
+    .card-tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ffe6c7;
+      color: #b14a21;
+      font-size: 14px;
+      font-family: "Bubblegum Sans", cursive;
+    }
+
+    /* =========================================================
+       EDIT TAMPILAN BOARD DI SINI
+       - grid-template-columns: repeat(6, 1fr) = 6 kotak per baris
+       - gap = jarak antar kotak
+       - border-radius = sudut board
+    ========================================================= */
+
+    .board-wrap {
+      padding: 18px;
+      position: relative;
+    }
+
+    .board {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      padding: 10px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, .52);
+      border: 2px solid rgba(255,255,255,.8);
+      overflow: hidden;
+    }
+
+    .board-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      position: relative;
+      border-radius: 18px;
+      background: linear-gradient(150deg, #fff6df, #ffd999);
+      border: 2px solid rgba(222, 123, 43, .45);
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      padding: 9px;
+      font-weight: 900;
+      font-size: clamp(15px, 2vw, 24px);
+      color: #8c3f1c;
+      overflow: hidden;
+    }
+
+    .cell:nth-child(3n) { background: linear-gradient(150deg, #ffe8b8, #ffbd70); }
+    .cell:nth-child(5n) { background: linear-gradient(150deg, #fff4d9, #ffcf8b); }
+
+    .cell.final {
+      background: linear-gradient(150deg, #ff9a4f, #e95d2e);
+      color: #fff;
+    }
+
+    .cell.start {
+      background: linear-gradient(150deg, #ff8f4c, #eb5c2d);
+      color: #fff;
+    }
+
+    .cell-number {
+      position: relative;
+      z-index: 2;
+      font-family: "Bubblegum Sans", cursive;
+      font-size: clamp(20px, 2vw, 34px);
+      line-height: 1;
+    }
+
+    .cell-icon {
+      position: absolute;
+      right: 8px;
+      bottom: 7px;
+      font-size: clamp(17px, 2.6vw, 28px);
+      opacity: .92;
+      filter: drop-shadow(0 3px 3px rgba(80,30,5,.12));
+      z-index: 2;
+    }
+
+    .cell-label {
+      position: absolute;
+      left: 10px;
+      bottom: 8px;
+      font-size: clamp(11px, 1.2vw, 14px);
+      font-family: "Bubblegum Sans", cursive;
+      opacity: .9;
+      z-index: 2;
+    }
+
+    .marker {
+      width: 28px;
+      height: 28px;
+      border-radius: 50% 50% 45% 45%;
+      position: absolute;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
+      border: 2px solid rgba(255,255,255,.9);
+      box-shadow: 0 8px 12px rgba(93, 35, 6, .23);
+      transition: left .38s ease, top .38s ease;
+      transform: translate(-50%, -50%);
+    }
+
+    .mission-log {
+      margin-top: 18px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .mission-log h2 {
+      display: inline-block;
+      min-width: 220px;
+      margin-bottom: 10px;
+    }
+
+    .mission-log p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(55, 24, 8, .45);
+      display: grid;
+      place-items: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .modal {
+      width: min(520px, 94vw);
+      border-radius: 30px;
+      padding: 24px;
+      background: #fff6e5;
+      border: 3px solid rgba(255,255,255,.85);
+      box-shadow: 0 25px 60px rgba(54, 23, 4, .35);
+      text-align: center;
+      animation: pop .2s ease-out;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      color: #c94e22;
+      font-size: 28px;
+      font-family: "Coiny", cursive;
+      font-weight: 400;
+    }
+
+    .modal p {
+      margin: 0 0 18px;
+      line-height: 1.55;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .modal .box-num {
+      display: inline-block;
+      margin-bottom: 10px;
+      background: linear-gradient(180deg, #ff9b57, #e85e2d);
+      color: white;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 18px;
+      font-family: "Bubblegum Sans", cursive;
+    }
+
+    @media (max-width: 850px) {
+      .topbar {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .status-box {
+        text-align: center;
+        min-width: unset;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel { order: 2; }
+      .board-wrap { order: 1; padding: 10px; }
+      .board { gap: 5px; padding: 6px; }
+      .cell { border-radius: 12px; padding: 5px; }
+      .marker { width: 22px; height: 22px; font-size: 10px; }
+    }
+
+    /* =========================================================
+       FIX WARNA / FORCE LIGHT MODE
+       Supaya warna tetap sama walaupun HP dark mode atau in-app browser.
+    ========================================================= */
+
+    :root {
+      color-scheme: light only;
+      forced-color-adjust: none;
+    }
+
+    html,
+    body {
+      color-scheme: light only;
+      forced-color-adjust: none;
+      background-color: #ff9c4a !important;
+      color: #6f351e !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+      forced-color-adjust: none;
+    }
+
+    input,
+    textarea,
+    select,
+    button {
+      color-scheme: light only;
+      forced-color-adjust: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,.55), transparent 25%),
+        radial-gradient(circle at 90% 20%, rgba(255,255,255,.35), transparent 22%),
+        linear-gradient(135deg, #ffe47d 0%, #ff9c4a 48%, #f66a35 100%) !important;
+    }
+
+    .login-card,
+    .topbar,
+    .side-panel,
+    .board-wrap,
+    .mission-log,
+    .modal {
+      background: rgba(255, 246, 226, 0.92) !important;
+      color: #6f351e !important;
+      border-color: rgba(255,255,255,.75) !important;
+    }
+
+    .player-card,
+    .dice-area,
+    .photo-upload {
+      background: #fff6e8 !important;
+      color: #6f351e !important;
+      border-color: #ffd49b !important;
+    }
+
+    .board {
+      background: rgba(255, 255, 255, .52) !important;
+      border-color: rgba(255,255,255,.8) !important;
+    }
+
+    .cell {
+      background: linear-gradient(150deg, #fff6df, #ffd999) !important;
+      border-color: rgba(222, 123, 43, .45) !important;
+      color: #8c3f1c !important;
+    }
+
+    .cell:nth-child(3n) {
+      background: linear-gradient(150deg, #ffe8b8, #ffbd70) !important;
+    }
+
+    .cell:nth-child(5n) {
+      background: linear-gradient(150deg, #fff4d9, #ffcf8b) !important;
+    }
+
+    .cell.final,
+    .cell.start {
+      background: linear-gradient(150deg, #ff8f4c, #eb5c2d) !important;
+      color: #ffffff !important;
+    }
+
+    .dice {
+      background: #fffdf7 !important;
+      color: #d74d21 !important;
+      border-color: #ffe0b1 !important;
+    }
+
+    .status-pill,
+    .card-tag {
+      background: #ffe6c7 !important;
+      color: #b14a21 !important;
+      border-color: #ffbf7b !important;
+    }
+
+    .side-panel h2,
+    .mission-log h2,
+    button,
+    .modal .box-num {
+      background: linear-gradient(180deg, #ff9a4e, #ee6c32) !important;
+      color: #ffffff !important;
+    }
+
+    .title h1,
+    .modal h2 {
+      color: #b9471f !important;
+    }
+
+    .modal-backdrop {
+      background: rgba(55, 24, 8, .45) !important;
+    }
+
+
+    /* =========================================================
+       LOGIN PAGE
+    ========================================================= */
+
+    .login-card {
+      width: min(460px, 92vw);
+      margin: 9vh auto;
+      padding: 30px 26px;
+      border-radius: 30px;
+      background: rgba(255, 246, 226, 0.94);
+      box-shadow: var(--shadow);
+      border: 2px solid rgba(255,255,255,.82);
+      text-align: center;
+      color: #6f351e;
+    }
+
+    .login-card h1 {
+      margin: 0 0 10px;
+      font-family: "Coiny", cursive;
+      letter-spacing: 1px;
+      color: #b9471f;
+      text-shadow: 2px 3px 0 rgba(255,255,255,.75);
+      line-height: 1;
+      font-weight: 400;
+      font-size: clamp(42px, 10vw, 64px);
+    }
+
+    .login-card p {
+      margin: 0 0 18px;
+      font-size: 15px;
+      line-height: 1.5;
+      font-weight: 800;
+      font-family: "Schoolbell", cursive;
+      letter-spacing: .2px;
+    }
+
+    .login-badges {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+
+    .label-chip {
+      background: #fff4dc;
+      border: 1px solid #ffc071;
+      color: #b34a20;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-family: "Bubblegum Sans", cursive;
+    }
+
+    input {
+      width: 100%;
+      border: 2px solid #ffc071;
+      border-radius: 18px;
+      padding: 14px 16px;
+      outline: none;
+      font-size: 16px;
+      color: #6f351e !important;
+      background: #fffaf0 !important;
+      margin-bottom: 12px;
+      font-weight: 800;
+      font-family: "Nunito", Arial, sans-serif;
+    }
+
+    input::placeholder {
+      color: #b97b56;
+      font-weight: 700;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      background: rgba(84, 34, 10, .94);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 999px;
+      z-index: 1000;
+      font-size: 14px;
+      display: none;
+      font-weight: 800;
+    }
+
+
+    /* =========================================================
+       SCHOOLBELL TEXT + PHOTO LOGIN
+    ========================================================= */
+
+    .title p,
+    .status-box,
+    .status-pill,
+    .dice-area .small-note,
+    .player-name,
+    .player-pos,
+    .login-card p,
+    .login-card input {
+      font-family: "Schoolbell", cursive !important;
+      letter-spacing: .2px;
+    }
+
+    .title p {
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 400;
+    }
+
+    .status-box {
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .status-pill {
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .dice-area .small-note {
+      font-size: 15px;
+      font-weight: 400;
+    }
+
+    .player-name {
+      font-size: 16px;
+      font-weight: 400;
+    }
+
+    .player-pos {
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .login-card input {
+      font-size: 17px;
+      font-weight: 400;
+    }
+
+    .photo-upload {
+      margin: 4px 0 12px;
+      padding: 12px;
+      border-radius: 20px;
+      background: #fff6e8;
+      border: 2px dashed #ffba72;
+      text-align: center;
+    }
+
+    .photo-upload label {
+      display: block;
+      margin-bottom: 8px;
+      font-family: "Schoolbell", cursive;
+      font-size: 16px;
+      color: #7b351c;
+    }
+
+    .photo-upload input {
+      display: none;
+    }
+
+    .photo-btn {
+      display: inline-block;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ff9a4e, #ee6c32);
+      color: #ffffff;
+      box-shadow: 0 5px 0 #b9401d;
+      font-family: "Schoolbell", cursive;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .photo-preview {
+      width: 82px;
+      height: 82px;
+      margin: 12px auto 0;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 3px solid #ffd49b;
+      background: #fffaf0;
+      display: none;
+      box-shadow: 0 8px 16px rgba(95, 33, 9, .15);
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .player-token.has-photo,
+    .marker.has-photo {
+      overflow: hidden;
+      padding: 0;
+      background: #fff6e8 !important;
+    }
+
+    .player-token.has-photo img,
+    .marker.has-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+
+    .music-btn {
+      margin-top: 8px;
+      padding: 8px 13px;
+      font-size: 15px;
+      box-shadow: 0 5px 0 #b9401d, 0 9px 14px rgba(95, 33, 9, .16);
+      font-family: "Schoolbell", cursive !important;
+    }
+
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <section id="loginScreen" class="screen">
+    <div class="login-card">
+      <h1>Little Pillow's Board Game</h1>
+      <p>Masukkan nama dan password untuk masuk ke game live. Semua pemain akan masuk ke room yang sama.</p>
+
+      <div class="login-badges">
+        <div class="label-chip">Live Board Game</div>
+        <div class="label-chip">1 Shared Room</div>
+      </div>
+
+      <input id="nameInput" placeholder="Nama / Username kamu" />
+      <input id="passwordInput" type="password" placeholder="Password game" />
+
+      <div class="photo-upload">
+        <label>Upload foto player kamu</label>
+        <label for="photoInput" class="photo-btn">Pilih Foto</label>
+        <input id="photoInput" type="file" accept="image/*" />
+        <div id="photoPreview" class="photo-preview">
+          <img id="photoPreviewImg" alt="Preview foto player" />
+        </div>
+      </div>
+
+      <button id="joinBtn">Masuk Game</button>
+
+      <div class="small-note">
+        Password default bisa diganti di bagian <b>GAME_PASSWORD</b>.
+      </div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen hidden">
+    <div class="topbar">
+      <div class="title">
+        <h1>Little Pillow's Board Game</h1>
+        <p>Roll the dice, complete the mission, and reach the final step together</p>
+      </div>
+
+      <div class="status-box">
+        <div>Status: <span id="gameStatus">Mode preview tampilan</span></div>
+        <div class="status-pill" id="turnLabel">Giliran: Player 1</div>
+        <button id="musicBtn" class="music-btn" type="button">Music: On</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="side-panel">
+        <h2>Players</h2>
+        <div id="playerList" class="player-list"></div>
+
+        <div class="dice-area">
+          <div id="dice" class="dice">?</div>
+          <button id="rollBtn">Coba Dadu</button>
+          <div class="small-note" id="diceNote">Ini cuma preview lokal buat cek tampilan.</div>
+          <div class="card-tag">Game by @pillowslittle</div>
+        </div>
+      </aside>
+
+      <main>
+        <div class="board-wrap">
+          <div id="board" class="board"></div>
+        </div>
+
+        <div class="mission-log">
+          <h2>Last Mission</h2>
+          <p id="lastMission">Belum ada misi.</p>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <div id="missionModal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="box-num" id="modalBox">Kotak 1</div>
+      <h2 id="modalTitle">Mission</h2>
+      <p id="modalText">Isi misi akan muncul di sini.</p>
+      <button id="doneMissionBtn">Tutup</button>
+    </div>
+  </div>
+
+  <audio id="bgMusic" preload="auto"></audio>
+  <div id="toast" class="toast"></div>
+
+  <script>
+
+    const SUPABASE_URL = "https://mvtxsyybpvsyfiffaita.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_MPAUkapSBF9XM0rNLlaFVA_sDFNfS8o";
+
+    const GAME_ROOM_ID = "little-pillows-board-live-v1";
+    const GAME_PASSWORD = "littlepillows123"; // ganti password di sini kalau mau
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const musicPlaylist = [
+      "https://raw.githubusercontent.com/aydzensng/BoardGame/bb140541ec5811204ba1fcfafea7918e6fb98572/%5BENGTRANS%5D%20%E5%AD%99%E6%94%BF%E5%90%95%E6%80%9D%E7%9E%B3%E5%9C%A8%E5%90%97%20(Are%20you%20there_)%E6%AD%8C%E8%AF%8D%20%E5%8F%8C%E7%A8%8B%20Double%20Helix%20OST%20Lyrics%20(Color%20Coded%20Lyrics).mp3",
+      "https://raw.githubusercontent.com/aydzensng/BoardGame/bb140541ec5811204ba1fcfafea7918e6fb98572/%E5%88%AB%E5%93%AD.mp3",
+      "https://raw.githubusercontent.com/aydzensng/BoardGame/bb140541ec5811204ba1fcfafea7918e6fb98572/%E4%B8%80%E5%88%86%E9%92%9F%E6%9A%A7%E6%98%A7.mp3",
+      "https://raw.githubusercontent.com/aydzensng/BoardGame/bb140541ec5811204ba1fcfafea7918e6fb98572/Be%20Your%20Light%E5%81%B7%E5%81%B7%E8%97%8F%E4%B8%8D%E4%BD%8F%E9%9B%BB%E8%A6%96%E5%8A%87%E6%8F%92%E6%9B%B2-%20%E9%A6%AC%E4%BC%AF%E9%A8%AB%E6%BC%AB%E5%A4%A9%E8%8A%B1%E7%93%A3%E5%9C%A8%E6%88%91%E5%80%91%E8%BA%AB%E5%BE%8C%20%E8%B7%9F%E9%9A%A8%E6%98%AF%E5%A6%B3%E6%89%8D%20%E8%AE%93%20%E9%99%BD%E5%85%89%E8%90%BD%E4%B8%8B%E4%BE%86%E5%8B%95%E6%85%8B%E6%AD%8C%E8%A9%9E.mp3",
+      "https://raw.githubusercontent.com/aydzensng/BoardGame/bb140541ec5811204ba1fcfafea7918e6fb98572/Forever%20Star%20(%E5%81%B7%E5%81%B7%E8%97%8F%E4%B8%8D%E4%BD%8F%E7%94%B5%E8%A7%86%E5%89%A7%E6%8F%92%E6%9B%B2).mp3",
+      "https://raw.githubusercontent.com/aydzensng/BoardGame/bb140541ec5811204ba1fcfafea7918e6fb98572/%E6%B1%AA%E8%98%87%E7%80%A7%20-%20%E6%9C%89%E9%BB%9E%E7%94%9C(Official%20MV).mp3"
+    ];
+
+
+const missions = {
+      1: "Start! Saling ucapkan satu kalimat manis sebelum mulai.",
+      2: "Ceritakan first impression kamu tentang pasanganmu.",
+      3: "Ceritakan satu hal kecil yang bikin kamu senyum dari pasangan kamu",
+      4: "Rate panggilan lucu atau nickname kamu dari pasangan mu",
+      5: "Sebutkan lagu yang mengingatkanmu pada hubungan kalian.",
+      6: "Coba bilang I Love You tanpa menyebutkan kata I love you ke pasanganmu",
+      7: "Post foto pasangan mu dan berikan pujian tulus ke pasanganmu",
+      8: "Tidak ada mission di kotak ini, boleh next",
+      9: "Sebutkan satu hal yang ingin kalian lakukan bersama suatu hari nanti.",
+      10: "Deskripsikan pasanganmu full satu tweet (jangan lupa kasih fotonya juga hehe)",
+      11: "Minta maaf untuk satu hal kecil yang mungkin pernah membuat pasanganmu kesal.",
+      12: "Sebutkan apa yang membuat pasanganmu spesial buat kamu.",
+      13: "Buat satu janji kecil yang bisa kamu lakukan hari ini.",
+      14: "Tirukan reaksi kamu saat pertama kali dekat dengan pasanganmu.",
+      15: "Sebutkan satu hal yang kamu syukuri dari hubungan ini.",
+      16: "Kalau kita tukeran badan sehari, hal pertama yang bakal kamu lakuin apa?",
+      17: "Apa hal kecil yang paling kamu suka dari aku?",
+      18: "Ceritakan ide date impian kalian.",
+      19: "Katakan sesuatu yang bisa bikin pasanganmu salting.",
+      20: "Pernah nggak aku bikin kamu salting? Kapan?",
+      21: "Pilih satu warna yang menggambarkan pasanganmu dan jelaskan alasannya.",
+      22: "Buat pengakuan cinta atau soft word ke pasangan kamu dan tag pasangan kamu",
+      23: "Bagian tubuh aku yang paling kamu suka?",
+      24: "Katakan satu hal yang tidak ingin pasanganmu lupakan.",
+      25: "Pilih theme song untuk hubungan kalian.",
+      26: "Buat appreciation speech selama 10 detik untuk pasanganmu.",
+      27: "Sebutkan satu alasan kenapa kamu memilih dia.",
+      28: "Tidak ada mission di kotak ini, boleh next",
+      29: "Berikan satu kalimat penenang untuk pasanganmu.",
+      30: "Final mission! Sampaikan pesan termanis untuk pasanganmu."
+    };
+
+    /* =========================================================
+       EDIT ULAR & TANGGA DI SINI
+
+       TANGGA:
+       - from harus angka kecil
+       - to harus angka besar
+
+       ULAR:
+       - from harus angka besar / kepala ular
+       - to harus angka kecil / buntut ular
+
+       PENTING:
+       - Jangan pakai angka yang sama dua kali.
+       - Jangan pakai 1 dan 30.
+    ========================================================= */
+
+const boardConfig = {
+      ladders: [
+        { from: 3, to: 10 },
+        { from: 12, to: 14 },
+        { from: 16, to: 22 }
+      ],
+      snakes: [
+        { from: 8, to: 6 },
+        { from: 20, to: 18 },
+        { from: 27, to: 23 }
+      ]
+    };
+
+    const icons = ["💌", "💕", "⭐", "🌷", "💖", "🎁", "🔐", "✨", "💐"];
+
+    let currentRoom = GAME_ROOM_ID;
+    let myId = localStorage.getItem("little_pillows_player_id");
+    let myName = "";
+    let myPhoto = localStorage.getItem("little_pillows_player_photo") || "";
+    let state = null;
+    let channel = null;
+    let isAnimating = false;
+    let lastActionKey = "";
+
+    if (!myId) {
+      myId = crypto.randomUUID();
+      localStorage.setItem("little_pillows_player_id", myId);
+    }
+
+    const loginScreen = document.getElementById("loginScreen");
+    const gameScreen = document.getElementById("gameScreen");
+    const joinBtn = document.getElementById("joinBtn");
+    const nameInput = document.getElementById("nameInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const photoInput = document.getElementById("photoInput");
+    const photoPreview = document.getElementById("photoPreview");
+    const photoPreviewImg = document.getElementById("photoPreviewImg");
+
+    const playerList = document.getElementById("playerList");
+    const board = document.getElementById("board");
+    const dice = document.getElementById("dice");
+    const rollBtn = document.getElementById("rollBtn");
+    const diceNote = document.getElementById("diceNote");
+    const turnLabel = document.getElementById("turnLabel");
+    const gameStatus = document.getElementById("gameStatus");
+    const lastMission = document.getElementById("lastMission");
+    const missionModal = document.getElementById("missionModal");
+    const modalBox = document.getElementById("modalBox");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalText = document.getElementById("modalText");
+    const doneMissionBtn = document.getElementById("doneMissionBtn");
+    const toast = document.getElementById("toast");
+    const bgMusic = document.getElementById("bgMusic");
+    const musicBtn = document.getElementById("musicBtn");
+    let currentMusicIndex = 0;
+    let musicStarted = false;
+
+    joinBtn.addEventListener("click", joinGame);
+    photoInput.addEventListener("change", handlePhotoUpload);
+
+    if (myPhoto) {
+      photoPreviewImg.src = myPhoto;
+      photoPreview.style.display = "block";
+    }
+    rollBtn.addEventListener("click", rollDice);
+    doneMissionBtn.addEventListener("click", finishMission);
+    musicBtn.addEventListener("click", toggleMusic);
+    bgMusic.addEventListener("ended", playNextMusic);
+
+    window.addEventListener("resize", () => {
+      renderBoardDecorations();
+      renderMarkers();
+    });
+
+    buildBoard();
+
+
+    function handlePhotoUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const img = new Image();
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const size = 360;
+          canvas.width = size;
+          canvas.height = size;
+
+          const ctx = canvas.getContext("2d");
+          const scale = Math.max(size / img.width, size / img.height);
+          const width = img.width * scale;
+          const height = img.height * scale;
+          const x = (size - width) / 2;
+          const y = (size - height) / 2;
+
+          ctx.drawImage(img, x, y, width, height);
+
+          myPhoto = canvas.toDataURL("image/jpeg", 0.82);
+          localStorage.setItem("little_pillows_player_photo", myPhoto);
+
+          photoPreviewImg.src = myPhoto;
+          photoPreview.style.display = "block";
+        };
+
+        img.src = reader.result;
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    async function joinGame() {
+      const name = nameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!name) return showToast("Isi nama kamu dulu.");
+      if (!password) return showToast("Isi password dulu.");
+      if (password !== GAME_PASSWORD) return showToast("Password salah.");
+
+      myName = name;
+
+      await loadOrCreateRoom();
+      if (!state) return;
+
+      await addPlayer();
+
+      loginScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      startMusic();
+
+      subscribeRoom();
+      render();
+    }
+
+    async function loadOrCreateRoom() {
+      const { data, error } = await supabaseClient
+        .from("love_ladder_rooms")
+        .select("*")
+        .eq("id", currentRoom)
+        .maybeSingle();
+
+      if (error) {
+        console.error(error);
+        showToast("Gagal load room. Cek table Supabase dulu ya.");
+        return;
+      }
+
+      if (!data) {
+        const initialState = {
+          players: [],
+          turnIndex: 0,
+          turnRandomized: false,
+          locked: false,
+          currentAction: null,
+          lastMission: null,
+          winner: null,
+          createdAt: Date.now()
+        };
+
+        const { error: insertError } = await supabaseClient
+          .from("love_ladder_rooms")
+          .insert({
+            id: currentRoom,
+            state: initialState
+          });
+
+        if (insertError) {
+          console.error(insertError);
+          showToast("Gagal bikin room. Cek policy Supabase.");
+          return;
+        }
+
+        state = initialState;
+      } else {
+        state = data.state;
+
+        if (typeof state.turnRandomized === "undefined") {
+          state.turnRandomized = false;
+          await saveState();
+        }
+      }
+    }
+
+    async function addPlayer() {
+      const existing = state.players.find(p => p.id === myId);
+
+      if (existing) {
+        existing.name = myName;
+        existing.online = true;
+        existing.photo = myPhoto || existing.photo || "";
+      } else {
+        state.players.push({
+          id: myId,
+          name: myName,
+          position: 1,
+          color: getPlayerColor(state.players.length),
+          online: true,
+          photo: myPhoto || ""
+        });
+      }
+
+      if (state.players.length >= 2 && !state.turnRandomized) {
+        state.turnIndex = Math.floor(Math.random() * state.players.length);
+        state.turnRandomized = true;
+      }
+
+      if (state.turnIndex >= state.players.length) {
+        state.turnIndex = 0;
+      }
+
+      await saveState();
+    }
+
+    function subscribeRoom() {
+      if (channel) {
+        supabaseClient.removeChannel(channel);
+      }
+
+      channel = supabaseClient
+        .channel("room_" + currentRoom)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "love_ladder_rooms",
+            filter: "id=eq." + currentRoom
+          },
+          payload => {
+            state = payload.new.state;
+            render();
+
+            const action = state.currentAction;
+            const actionKey = action ? `${action.type}-${action.playerId}-${action.createdAt}` : "";
+
+            if (action && actionKey !== lastActionKey) {
+              lastActionKey = actionKey;
+
+              if (action.type === "rolling") showRollingFromState();
+              if (action.type === "mission") handleMissionState();
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    async function saveState() {
+      const { error } = await supabaseClient
+        .from("love_ladder_rooms")
+        .update({
+          state,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", currentRoom);
+
+      if (error) {
+        console.error(error);
+        showToast("Gagal update game.");
+      }
+    }
+
+    function buildBoard() {
+      board.innerHTML = "";
+
+      const visualOrder = [
+        25, 26, 27, 28, 29, 30,
+        24, 23, 22, 21, 20, 19,
+        13, 14, 15, 16, 17, 18,
+        12, 11, 10, 9, 8, 7,
+        1, 2, 3, 4, 5, 6
+      ];
+
+      visualOrder.forEach(num => {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.num = num;
+
+        if (num === 1) cell.classList.add("start");
+        if (num === 30) cell.classList.add("final");
+
+        const label = document.createElement("span");
+        label.className = "cell-number";
+        label.textContent = num;
+
+        const icon = document.createElement("span");
+        icon.className = "cell-icon";
+        icon.textContent = num === 30 ? "💞" : icons[num % icons.length];
+
+        cell.appendChild(label);
+        cell.appendChild(icon);
+
+        if (num === 1) {
+          const startLabel = document.createElement("span");
+          startLabel.className = "cell-label";
+          startLabel.textContent = "Start";
+          cell.appendChild(startLabel);
+        }
+
+        if (num === 30) {
+          const endLabel = document.createElement("span");
+          endLabel.className = "cell-label";
+          endLabel.textContent = "Together";
+          cell.appendChild(endLabel);
+        }
+
+        board.appendChild(cell);
+      });
+    }
+
+    function createSvgEl(tag, attrs = {}) {
+      const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+      return el;
+    }
+
+    function getBoardSvg() {
+      let svg = document.getElementById("boardSvg");
+      if (!svg) {
+        svg = createSvgEl("svg", { id: "boardSvg", class: "board-svg" });
+        board.appendChild(svg);
+      }
+
+      svg.setAttribute("width", board.clientWidth);
+      svg.setAttribute("height", board.clientHeight);
+      svg.setAttribute("viewBox", `0 0 ${board.clientWidth} ${board.clientHeight}`);
+      return svg;
+    }
+
+    function render() {
+      if (!state) return;
+
+      renderPlayers();
+      renderBoardDecorations();
+      renderMarkers();
+      renderTurn();
+      renderLastMission();
+
+      const currentPlayer = getCurrentPlayer();
+      const isMyTurn = currentPlayer && currentPlayer.id === myId;
+
+      rollBtn.disabled = !isMyTurn || state.locked || !!state.winner || isAnimating;
+
+      if (state.winner) {
+        gameStatus.textContent = `${state.winner.name} sudah mencapai kotak 30!`;
+        diceNote.textContent = "Game selesai.";
+      } else if (state.locked && currentPlayer) {
+        gameStatus.textContent = `${currentPlayer.name} sedang bermain...`;
+        diceNote.textContent = isMyTurn ? "Selesaikan misi kamu dulu." : "Tunggu pemain ini menyelesaikan misi.";
+      } else if (currentPlayer) {
+        gameStatus.textContent = "Game berjalan.";
+        diceNote.textContent = isMyTurn ? "Sekarang giliran kamu." : "Tunggu giliran kamu.";
+      } else {
+        gameStatus.textContent = "Menunggu pemain...";
+      }
+    }
+
+    function renderPlayers() {
+      playerList.innerHTML = "";
+
+      state.players.forEach((player, index) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+
+        const token = document.createElement("div");
+        token.className = "player-token";
+        token.style.background = player.color;
+
+        if (player.photo) {
+          token.classList.add("has-photo");
+          const img = document.createElement("img");
+          img.src = player.photo;
+          img.alt = player.name;
+          token.appendChild(img);
+        } else {
+          token.textContent = index + 1;
+        }
+
+        const info = document.createElement("div");
+        info.style.flex = "1";
+
+        const name = document.createElement("div");
+        name.className = "player-name";
+        name.textContent = player.name;
+
+        const pos = document.createElement("div");
+        pos.className = "player-pos";
+        pos.textContent = `Kotak ${player.position}`;
+
+        info.appendChild(name);
+        info.appendChild(pos);
+
+        card.appendChild(token);
+        card.appendChild(info);
+
+        if (index === state.turnIndex && !state.winner) {
+          const badge = document.createElement("div");
+          badge.className = "turn-badge";
+          badge.textContent = "TURN";
+          card.appendChild(badge);
+        }
+
+        playerList.appendChild(card);
+      });
+    }
+
+    function renderTurn() {
+      const currentPlayer = getCurrentPlayer();
+      turnLabel.textContent = currentPlayer ? `Giliran: ${currentPlayer.name}` : "Giliran: -";
+    }
+
+    function renderMarkers() {
+      document.querySelectorAll(".marker").forEach(el => el.remove());
+      if (!state) return;
+
+      state.players.forEach((player, index) => {
+        const center = getCellCenter(player.position);
+        if (!center) return;
+
+        const marker = document.createElement("div");
+        marker.className = "marker";
+        marker.style.background = player.color;
+
+        if (player.photo) {
+          marker.classList.add("has-photo");
+          const img = document.createElement("img");
+          img.src = player.photo;
+          img.alt = player.name;
+          marker.appendChild(img);
+        } else {
+          marker.textContent = index + 1;
+        }
+
+        const offsetX = index === 0 ? -8 : 8;
+        const offsetY = index === 0 ? -8 : 8;
+
+        marker.style.left = center.x + offsetX + "px";
+        marker.style.top = center.y + offsetY + "px";
+
+        board.appendChild(marker);
+      });
+    }
+
+    function renderLastMission() {
+      if (!state.lastMission) {
+        lastMission.textContent = "Belum ada misi.";
+        return;
+      }
+
+      lastMission.textContent = `${state.lastMission.playerName} berhenti di kotak ${state.lastMission.box}: ${state.lastMission.text}`;
+    }
+
+    function renderBoardDecorations() {
+      const svg = getBoardSvg();
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      boardConfig.ladders.forEach(item => drawLadder(svg, item.from, item.to));
+      boardConfig.snakes.forEach(item => drawSnake(svg, item.from, item.to));
+    }
+
+    function drawLadder(svg, from, to) {
+      const start = getCellCenter(from);
+      const end = getCellCenter(to);
+      if (!start || !end) return;
+
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const dist = Math.hypot(dx, dy);
+      if (!dist) return;
+
+      const ux = dx / dist;
+      const uy = dy / dist;
+      const px = -uy;
+      const py = ux;
+
+      const shorten = 14;
+      const railGap = Math.max(14, Math.min(20, dist / 8));
+      const rungCount = Math.max(4, Math.floor(dist / 34));
+
+      const a = { x: start.x + ux * shorten, y: start.y + uy * shorten };
+      const b = { x: end.x - ux * shorten, y: end.y - uy * shorten };
+
+      const group = createSvgEl("g");
+
+      const rail1 = {
+        x1: a.x + px * railGap / 2, y1: a.y + py * railGap / 2,
+        x2: b.x + px * railGap / 2, y2: b.y + py * railGap / 2
+      };
+
+      const rail2 = {
+        x1: a.x - px * railGap / 2, y1: a.y - py * railGap / 2,
+        x2: b.x - px * railGap / 2, y2: b.y - py * railGap / 2
+      };
+
+      [rail1, rail2].forEach(line => {
+        group.appendChild(createSvgEl("line", {
+          x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2,
+          stroke: "rgba(56,42,104,.16)", "stroke-width": 4, "stroke-linecap": "round"
+        }));
+      });
+
+      [rail1, rail2].forEach(line => {
+        group.appendChild(createSvgEl("line", {
+          x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2,
+          stroke: "#4a3f84", "stroke-width": 4, "stroke-linecap": "round"
+        }));
+      });
+
+      for (let i = 1; i < rungCount; i++) {
+        const t = i / rungCount;
+        const cx = a.x + (b.x - a.x) * t;
+        const cy = a.y + (b.y - a.y) * t;
+
+        group.appendChild(createSvgEl("line", {
+          x1: cx + px * railGap / 2,
+          y1: cy + py * railGap / 2,
+          x2: cx - px * railGap / 2,
+          y2: cy - py * railGap / 2,
+          stroke: "#4a3f84",
+          "stroke-width": 4,
+          "stroke-linecap": "round"
+        }));
+      }
+
+      svg.appendChild(group);
+    }
+
+    function buildSnakePath(head, tail) {
+      const dx = tail.x - head.x;
+      const dy = tail.y - head.y;
+      const dist = Math.hypot(dx, dy);
+      const px = -dy / dist;
+      const py = dx / dist;
+
+      const pointCount = Math.max(4, Math.min(7, Math.round(dist / 70)));
+      const amplitude = Math.max(14, Math.min(28, dist / 7));
+      const points = [head];
+
+      for (let i = 1; i < pointCount; i++) {
+        const t = i / pointCount;
+        const baseX = head.x + dx * t;
+        const baseY = head.y + dy * t;
+        const side = i % 2 === 0 ? -1 : 1;
+        const curveAmp = amplitude * Math.sin(Math.PI * t) * side;
+        points.push({ x: baseX + px * curveAmp, y: baseY + py * curveAmp });
+      }
+
+      points.push(tail);
+
+      let d = `M ${points[0].x} ${points[0].y}`;
+
+      for (let i = 1; i < points.length - 1; i++) {
+        const xc = (points[i].x + points[i + 1].x) / 2;
+        const yc = (points[i].y + points[i + 1].y) / 2;
+        d += ` Q ${points[i].x} ${points[i].y} ${xc} ${yc}`;
+      }
+
+      d += ` T ${points[points.length - 1].x} ${points[points.length - 1].y}`;
+
+      return { d, points };
+    }
+
+    function drawSnake(svg, from, to) {
+      const head = getCellCenter(from);
+      const tail = getCellCenter(to);
+      if (!head || !tail) return;
+
+      const { d, points } = buildSnakePath(head, tail);
+      const group = createSvgEl("g");
+
+      group.appendChild(createSvgEl("path", {
+        d, fill: "none", stroke: "rgba(104,61,9,.16)", "stroke-width": 15, "stroke-linecap": "round", "stroke-linejoin": "round"
+      }));
+
+      group.appendChild(createSvgEl("path", {
+        d, fill: "none", stroke: "#f6b21a", "stroke-width": 12, "stroke-linecap": "round", "stroke-linejoin": "round"
+      }));
+
+      group.appendChild(createSvgEl("path", {
+        d, fill: "none", stroke: "#e88916", "stroke-width": 6, "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-dasharray": "6 26"
+      }));
+
+      group.appendChild(createSvgEl("path", {
+        d, fill: "none", stroke: "rgba(255,255,255,.28)", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-dasharray": "1 18"
+      }));
+
+      const next = points[1] || tail;
+      const prev = points[points.length - 2] || head;
+      const headAngle = Math.atan2(next.y - head.y, next.x - head.x) * 180 / Math.PI + 90;
+      const tailAngle = Math.atan2(tail.y - prev.y, tail.x - prev.x) * 180 / Math.PI + 90;
+
+      const headGroup = createSvgEl("g", { transform: `translate(${head.x} ${head.y}) rotate(${headAngle})` });
+      headGroup.appendChild(createSvgEl("ellipse", { cx: 0, cy: 0, rx: 5, ry: 8, fill: "#f6b21a", stroke: "#ea8f15", "stroke-width": 2 }));
+      headGroup.appendChild(createSvgEl("circle", { cx: -5, cy: -3, r: 1.8, fill: "#544886" }));
+      headGroup.appendChild(createSvgEl("circle", { cx: 5, cy: -3, r: 1.8, fill: "#544886" }));
+      headGroup.appendChild(createSvgEl("path", { d: "M 0 10 Q -3 17 -7 21 M 0 10 Q 3 17 7 21", fill: "none", stroke: "#ff5f79", "stroke-width": 2.4, "stroke-linecap": "round" }));
+      group.appendChild(headGroup);
+
+      const tailGroup = createSvgEl("g", { transform: `translate(${tail.x} ${tail.y}) rotate(${tailAngle})` });
+      tailGroup.appendChild(createSvgEl("path", { d: "M 0 -8 L 6 10 L -6 10 Z", fill: "#e6a412", stroke: "#de8d0e", "stroke-width": 1.5 }));
+      group.appendChild(tailGroup);
+
+      svg.appendChild(group);
+    }
+
+    async function rollDice() {
+      const currentPlayer = getCurrentPlayer();
+      if (!currentPlayer || currentPlayer.id !== myId) return showToast("Belum giliran kamu.");
+      if (state.locked || isAnimating) return showToast("Tunggu giliran selesai.");
+
+      const diceValue = Math.floor(Math.random() * 6) + 1;
+      const startPos = currentPlayer.position;
+      let targetPos = startPos + diceValue;
+
+      if (targetPos > 30) {
+        targetPos = 30 - (targetPos - 30);
+      }
+
+      state.locked = true;
+      state.currentAction = {
+        type: "rolling",
+        playerId: myId,
+        playerName: currentPlayer.name,
+        diceValue,
+        startPos,
+        targetPos,
+        createdAt: Date.now()
+      };
+
+      await saveState();
+
+      await animateRoll(diceValue);
+      await movePlayerStepByStep(currentPlayer.id, startPos, targetPos);
+
+      let finalPos = targetPos;
+      let specialText = "";
+
+      const ladder = boardConfig.ladders.find(item => item.from === targetPos);
+      const snake = boardConfig.snakes.find(item => item.from === targetPos);
+
+      if (ladder) {
+        finalPos = ladder.to;
+        specialText = `Naik tangga dari kotak ${ladder.from} ke kotak ${ladder.to}!`;
+        await movePlayerDirect(currentPlayer.id, finalPos);
+      } else if (snake) {
+        finalPos = snake.to;
+        specialText = `Turun karena ular dari kotak ${snake.from} ke kotak ${snake.to}.`;
+        await movePlayerDirect(currentPlayer.id, finalPos);
+      }
+
+      const freshPlayer = state.players.find(p => p.id === myId);
+      freshPlayer.position = finalPos;
+
+      state.currentAction = {
+        type: "mission",
+        playerId: myId,
+        playerName: currentPlayer.name,
+        diceValue,
+        box: finalPos,
+        mission: missions[finalPos],
+        specialText,
+        createdAt: Date.now()
+      };
+
+      state.lastMission = {
+        playerName: currentPlayer.name,
+        box: finalPos,
+        text: missions[finalPos]
+      };
+
+      if (finalPos === 30) {
+        state.winner = {
+          id: currentPlayer.id,
+          name: currentPlayer.name
+        };
+      }
+
+      await saveState();
+      showMissionModal(state.currentAction);
+    }
+
+    function showRollingFromState() {
+      const action = state.currentAction;
+      if (!action) return;
+
+      dice.classList.add("rolling");
+      gameStatus.textContent = `${action.playerName} sedang melempar dadu...`;
+
+      setTimeout(() => {
+        dice.classList.remove("rolling");
+        dice.textContent = action.diceValue;
+      }, 900);
+    }
+
+    function handleMissionState() {
+      const action = state.currentAction;
+      if (!action) return;
+
+      dice.textContent = action.diceValue;
+
+      if (action.playerId === myId) {
+        showMissionModal(action);
+      } else {
+        missionModal.classList.add("hidden");
+        gameStatus.textContent = `${action.playerName} mendapat misi di kotak ${action.box}.`;
+      }
+    }
+
+    async function animateRoll(value) {
+      isAnimating = true;
+      dice.classList.add("rolling");
+
+      let counter = 0;
+      const interval = setInterval(() => {
+        dice.textContent = Math.floor(Math.random() * 6) + 1;
+        counter++;
+        if (counter > 12) {
+          clearInterval(interval);
+          dice.classList.remove("rolling");
+          dice.textContent = value;
+        }
+      }, 80);
+
+      await wait(1100);
+      isAnimating = false;
+    }
+
+    async function movePlayerStepByStep(playerId, start, end) {
+      const direction = end >= start ? 1 : -1;
+
+      for (let pos = start + direction; direction === 1 ? pos <= end : pos >= end; pos += direction) {
+        const player = state.players.find(p => p.id === playerId);
+        if (!player) return;
+        player.position = pos;
+        renderPlayers();
+        renderMarkers();
+        await wait(360);
+      }
+    }
+
+    async function movePlayerDirect(playerId, finalPos) {
+      await wait(400);
+      const player = state.players.find(p => p.id === playerId);
+      if (!player) return;
+      player.position = finalPos;
+      renderPlayers();
+      renderMarkers();
+      await wait(500);
+    }
+
+    async function finishMission() {
+      const action = state.currentAction;
+      if (!action || action.playerId !== myId) return;
+
+      missionModal.classList.add("hidden");
+
+      if (state.winner) {
+        state.locked = false;
+        state.currentAction = null;
+        await saveState();
+        showToast("Game selesai!");
+        return;
+      }
+
+      state.locked = false;
+      state.currentAction = null;
+      state.turnIndex = getNextTurnIndex();
+      await saveState();
+    }
+
+    function showMissionModal(action) {
+      modalBox.textContent = `Kotak ${action.box}`;
+      modalTitle.textContent = action.specialText || "Mission";
+      modalText.textContent = action.mission;
+      missionModal.classList.remove("hidden");
+    }
+
+    function getCurrentPlayer() {
+      if (!state || !state.players.length) return null;
+      return state.players[state.turnIndex] || state.players[0];
+    }
+
+    function getNextTurnIndex() {
+      if (!state.players.length) return 0;
+      return (state.turnIndex + 1) % state.players.length;
+    }
+
+    function getCellCenter(num) {
+      const cell = board.querySelector(`.cell[data-num="${num}"]`);
+      if (!cell) return null;
+
+      const boardRect = board.getBoundingClientRect();
+      const rect = cell.getBoundingClientRect();
+
+      return {
+        x: rect.left - boardRect.left + rect.width / 2,
+        y: rect.top - boardRect.top + rect.height / 2
+      };
+    }
+
+    function getPlayerColor(index) {
+      const colors = [
+        "#ef5b4f",
+        "#f6b23f",
+        "#8a5cff",
+        "#4c9ee8",
+        "#43b883",
+        "#ff7b9c",
+        "#8d5524",
+        "#e06ed8"
+      ];
+
+      return colors[index % colors.length];
+    }
+
+
+    function startMusic() {
+      if (!musicPlaylist.length || musicStarted) return;
+
+      musicStarted = true;
+      bgMusic.volume = 0.45;
+      bgMusic.src = musicPlaylist[currentMusicIndex];
+
+      const playPromise = bgMusic.play();
+
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            musicBtn.textContent = "Music: On";
+          })
+          .catch(() => {
+            musicStarted = false;
+            musicBtn.textContent = "Play Music";
+            showToast("Klik tombol Music kalau lagunya belum muter.");
+          });
+      }
+    }
+
+    function playNextMusic() {
+      currentMusicIndex = (currentMusicIndex + 1) % musicPlaylist.length;
+      bgMusic.src = musicPlaylist[currentMusicIndex];
+      bgMusic.play().catch(() => {
+        musicStarted = false;
+        musicBtn.textContent = "Play Music";
+      });
+    }
+
+    function toggleMusic() {
+      if (!bgMusic.src) {
+        startMusic();
+        return;
+      }
+
+      if (bgMusic.paused) {
+        bgMusic.play()
+          .then(() => {
+            musicStarted = true;
+            musicBtn.textContent = "Music: On";
+          })
+          .catch(() => {
+            showToast("Musik belum bisa diputar. Coba klik sekali lagi.");
+          });
+      } else {
+        bgMusic.pause();
+        musicBtn.textContent = "Music: Off";
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 2200);
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+  </script>
+</body>
+</html>
