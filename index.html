@@ -1101,6 +1101,102 @@ const boardConfig = {
       reader.readAsDataURL(file);
     }
 
+
+    function normalizePlayerName(name) {
+      return String(name || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+    }
+
+    function makeStablePlayerId(name) {
+      return "player_" + normalizePlayerName(name)
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+    }
+
+    function mergeDuplicatePlayers(preferredName = "", preferredId = "", preferredPhoto = "") {
+      if (!state || !Array.isArray(state.players)) return false;
+
+      const groups = new Map();
+
+      state.players.forEach(player => {
+        const key = normalizePlayerName(player.name);
+        if (!key) return;
+
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(player);
+      });
+
+      let changed = false;
+      const cleanedPlayers = [];
+
+      groups.forEach((playersGroup, key) => {
+        if (playersGroup.length === 1) {
+          const single = playersGroup[0];
+
+          if (preferredName && key === normalizePlayerName(preferredName)) {
+            if (single.id !== preferredId) {
+              single.id = preferredId;
+              changed = true;
+            }
+
+            single.name = preferredName;
+            single.online = true;
+            single.lastSeen = Date.now();
+
+            if (preferredPhoto) single.photo = preferredPhoto;
+          }
+
+          cleanedPlayers.push(single);
+          return;
+        }
+
+        changed = true;
+
+        const isCurrentLogin = preferredName && key === normalizePlayerName(preferredName);
+
+        // Pilih data utama:
+        // 1. yang ID-nya sama dengan nama login sekarang
+        // 2. yang punya foto
+        // 3. yang posisinya paling jauh
+        const sorted = [...playersGroup].sort((a, b) => {
+          if (a.id === preferredId) return -1;
+          if (b.id === preferredId) return 1;
+          if ((a.photo ? 1 : 0) !== (b.photo ? 1 : 0)) return (b.photo ? 1 : 0) - (a.photo ? 1 : 0);
+          return Number(b.position || 1) - Number(a.position || 1);
+        });
+
+        const merged = sorted[0];
+        const bestPosition = Math.max(...playersGroup.map(p => Number(p.position || 1)));
+        const bestPhoto = preferredPhoto || playersGroup.find(p => p.photo)?.photo || merged.photo || "";
+        const bestColor = merged.color || playersGroup.find(p => p.color)?.color || getPlayerColor(cleanedPlayers.length);
+
+        merged.id = isCurrentLogin ? preferredId : (merged.id || makeStablePlayerId(merged.name));
+        merged.name = isCurrentLogin ? preferredName : merged.name;
+        merged.position = bestPosition;
+        merged.photo = bestPhoto;
+        merged.color = bestColor;
+        merged.online = isCurrentLogin ? true : !!merged.online;
+        merged.lastSeen = Date.now();
+
+        cleanedPlayers.push(merged);
+      });
+
+      if (cleanedPlayers.length !== state.players.length) {
+        changed = true;
+      }
+
+      state.players = cleanedPlayers;
+
+      if (state.turnIndex >= state.players.length) {
+        state.turnIndex = 0;
+        changed = true;
+      }
+
+      return changed;
+    }
+
     async function joinGame() {
       const name = nameInput.value.trim();
       const password = passwordInput.value.trim();
@@ -1110,6 +1206,11 @@ const boardConfig = {
       if (password !== GAME_PASSWORD) return showToast("Password salah.");
 
       myName = name;
+
+      // ID pemain dibuat dari nama.
+      // Jadi ayden / Ayden / AYDEN akan dianggap sebagai 1 pemain yang sama.
+      myId = makeStablePlayerId(myName);
+      localStorage.setItem("little_pillows_player_id", myId);
 
       await loadOrCreateRoom();
       if (!state) return;
@@ -1166,20 +1267,44 @@ const boardConfig = {
       } else {
         state = data.state;
 
+        let changed = false;
+
+        if (mergeDuplicatePlayers(myName, myId, myPhoto)) {
+          changed = true;
+        }
+
         if (typeof state.turnRandomized === "undefined") {
           state.turnRandomized = false;
+          changed = true;
+        }
+
+        if (changed) {
           await saveState();
         }
       }
     }
 
     async function addPlayer() {
-      const existing = state.players.find(p => p.id === myId);
+      mergeDuplicatePlayers(myName, myId, myPhoto);
+
+      const normalizedName = normalizePlayerName(myName);
+
+      const existing = state.players.find(p => {
+        return p.id === myId || normalizePlayerName(p.name) === normalizedName;
+      });
 
       if (existing) {
+        existing.id = myId;
         existing.name = myName;
         existing.online = true;
-        existing.photo = myPhoto || existing.photo || "";
+        existing.lastSeen = Date.now();
+
+        // Kalau upload foto baru, ganti foto. Kalau tidak upload, foto lama tetap.
+        if (myPhoto) {
+          existing.photo = myPhoto;
+        } else {
+          existing.photo = existing.photo || "";
+        }
       } else {
         state.players.push({
           id: myId,
@@ -1187,9 +1312,12 @@ const boardConfig = {
           position: 1,
           color: getPlayerColor(state.players.length),
           online: true,
+          lastSeen: Date.now(),
           photo: myPhoto || ""
         });
       }
+
+      mergeDuplicatePlayers(myName, myId, myPhoto);
 
       if (state.players.length >= 2 && !state.turnRandomized) {
         state.turnIndex = Math.floor(Math.random() * state.players.length);
@@ -1220,6 +1348,7 @@ const boardConfig = {
           },
           payload => {
             state = payload.new.state;
+            mergeDuplicatePlayers(myName, myId, myPhoto);
             render();
 
             const action = state.currentAction;
@@ -1349,7 +1478,12 @@ const boardConfig = {
     function renderPlayers() {
       playerList.innerHTML = "";
 
+      const shownNames = new Set();
+
       state.players.forEach((player, index) => {
+        const displayKey = normalizePlayerName(player.name);
+        if (shownNames.has(displayKey)) return;
+        shownNames.add(displayKey);
         const card = document.createElement("div");
         card.className = "player-card";
 
@@ -1404,7 +1538,12 @@ const boardConfig = {
       document.querySelectorAll(".marker").forEach(el => el.remove());
       if (!state) return;
 
+      const shownNames = new Set();
+
       state.players.forEach((player, index) => {
+        const displayKey = normalizePlayerName(player.name);
+        if (shownNames.has(displayKey)) return;
+        shownNames.add(displayKey);
         const center = getCellCenter(player.position);
         if (!center) return;
 
