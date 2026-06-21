@@ -1478,8 +1478,8 @@ const boardConfig = {
         gameStatus.textContent = `${state.winner.name} sudah mencapai kotak 30!`;
         diceNote.textContent = "Game selesai.";
       } else if (state.locked && currentPlayer) {
-        gameStatus.textContent = `${currentPlayer.name} sedang bermain...`;
-        diceNote.textContent = isMyTurn ? "Selesaikan misi kamu dulu." : "Tunggu pemain ini menyelesaikan misi.";
+        gameStatus.textContent = `${currentPlayer.name} sedang menjalankan dadu...`;
+        diceNote.textContent = isMyTurn ? "Tunggu animasi selesai." : "Tunggu animasi dadu selesai.";
       } else if (currentPlayer) {
         gameStatus.textContent = "Game berjalan.";
         diceNote.textContent = isMyTurn ? "Sekarang giliran kamu." : "Tunggu giliran kamu.";
@@ -1816,6 +1816,12 @@ const boardConfig = {
           id: currentPlayer.id,
           name: currentPlayer.name
         };
+        state.locked = false;
+      } else {
+        // Giliran berikutnya langsung dibuka setelah dadu selesai.
+        // Jadi tidak perlu menunggu player sebelumnya menutup / menyelesaikan misi.
+        state.locked = false;
+        state.turnIndex = getNextTurnIndex();
       }
 
       await saveState();
@@ -1892,23 +1898,9 @@ const boardConfig = {
     }
 
     async function finishMission() {
-      const action = state.currentAction;
-      if (!action || action.playerId !== myId) return;
-
+      // Tombol ini sekarang hanya menutup popup mission.
+      // Giliran berikutnya sudah otomatis terbuka setelah player selesai roll dice.
       missionModal.classList.add("hidden");
-
-      if (state.winner) {
-        state.locked = false;
-        state.currentAction = null;
-        await saveState();
-        showToast("Game selesai!");
-        return;
-      }
-
-      state.locked = false;
-      state.currentAction = null;
-      state.turnIndex = getNextTurnIndex();
-      await saveState();
     }
 
     function showMissionModal(action) {
