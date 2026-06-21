@@ -1077,6 +1077,20 @@ const boardConfig = {
     buildBoard();
 
 
+    window.addEventListener("unhandledrejection", async event => {
+      console.error(event.reason);
+
+      if (state && state.locked && state.currentAction && state.currentAction.type === "rolling") {
+        state.locked = false;
+        state.currentAction = null;
+        await saveState();
+        render();
+        showToast("Game dibuka lagi karena proses dadu sempat error.");
+      }
+    });
+
+
+
     function handlePhotoUpload(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
@@ -1210,6 +1224,30 @@ const boardConfig = {
       return changed;
     }
 
+
+    async function fixStuckRollingLock() {
+      if (!state || !state.locked || !state.currentAction) return false;
+
+      const action = state.currentAction;
+      const isRollingAction = action.type === "rolling";
+      const isTooLong = action.createdAt && Date.now() - action.createdAt > 9000;
+
+      if (isRollingAction && isTooLong) {
+        state.locked = false;
+        state.currentAction = null;
+
+        if (state.turnIndex >= state.players.length) {
+          state.turnIndex = 0;
+        }
+
+        await saveState();
+        showToast("Game dibuka lagi karena animasi dadu sempat nyangkut.");
+        return true;
+      }
+
+      return false;
+    }
+
     async function joinGame() {
       const name = nameInput.value.trim();
       const password = passwordInput.value.trim();
@@ -1294,6 +1332,8 @@ const boardConfig = {
         if (changed) {
           await saveState();
         }
+
+        await fixStuckRollingLock();
       }
     }
 
@@ -1362,6 +1402,7 @@ const boardConfig = {
           payload => {
             state = payload.new.state;
             mergeDuplicatePlayers(myName, myId, myPhoto);
+            fixStuckRollingLock();
             render();
 
             const action = state.currentAction;
@@ -1468,6 +1509,10 @@ const boardConfig = {
       renderMarkers();
       renderTurn();
       renderLastMission();
+
+      if (state.currentAction && state.currentAction.type === "mission" && state.locked) {
+        state.locked = false;
+      }
 
       const currentPlayer = getCurrentPlayer();
       const isMyTurn = currentPlayer && currentPlayer.id === myId;
@@ -1818,13 +1863,14 @@ const boardConfig = {
         };
         state.locked = false;
       } else {
-        // Giliran berikutnya langsung dibuka setelah dadu selesai.
-        // Jadi tidak perlu menunggu player sebelumnya menutup / menyelesaikan misi.
+        // Giliran berikutnya langsung dibuka setelah dadu + jalan token selesai.
+        // Jadi player lain tidak perlu menunggu misi ditutup.
         state.locked = false;
         state.turnIndex = getNextTurnIndex();
       }
 
       await saveState();
+      render();
       showMissionModal(state.currentAction);
     }
 
@@ -1898,8 +1944,8 @@ const boardConfig = {
     }
 
     async function finishMission() {
-      // Tombol ini sekarang hanya menutup popup mission.
-      // Giliran berikutnya sudah otomatis terbuka setelah player selesai roll dice.
+      // Tombol ini hanya menutup popup mission.
+      // Giliran sudah pindah otomatis setelah dadu selesai.
       missionModal.classList.add("hidden");
     }
 
