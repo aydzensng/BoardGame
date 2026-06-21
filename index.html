@@ -1798,11 +1798,8 @@ const boardConfig = {
 
       const diceValue = Math.floor(Math.random() * 6) + 1;
       const startPos = currentPlayer.position;
-      let targetPos = startPos + diceValue;
-
-      if (targetPos > 30) {
-        targetPos = 30 - (targetPos - 30);
-      }
+      const movePath = getMovePath(startPos, diceValue);
+      let targetPos = movePath.length ? movePath[movePath.length - 1] : startPos;
 
       state.locked = true;
       state.currentAction = {
@@ -1812,13 +1809,14 @@ const boardConfig = {
         diceValue,
         startPos,
         targetPos,
+        movePath,
         createdAt: Date.now()
       };
 
       await saveState();
 
       await animateRoll(diceValue);
-      await movePlayerStepByStep(currentPlayer.id, startPos, targetPos);
+      await movePlayerAlongPath(currentPlayer.id, movePath);
 
       let finalPos = targetPos;
       let specialText = "";
@@ -1918,6 +1916,39 @@ const boardConfig = {
 
       await wait(1100);
       isAnimating = false;
+    }
+
+    function getMovePath(startPos, diceValue) {
+      const path = [];
+      let pos = startPos;
+      let direction = 1;
+
+      for (let step = 0; step < diceValue; step++) {
+        if (pos >= 30) {
+          direction = -1;
+        }
+
+        if (pos <= 1) {
+          direction = 1;
+        }
+
+        pos += direction;
+        path.push(pos);
+      }
+
+      return path;
+    }
+
+    async function movePlayerAlongPath(playerId, path) {
+      for (const pos of path) {
+        const player = state.players.find(p => p.id === playerId);
+        if (!player) return;
+
+        player.position = pos;
+        renderPlayers();
+        renderMarkers();
+        await wait(360);
+      }
     }
 
     async function movePlayerStepByStep(playerId, start, end) {
